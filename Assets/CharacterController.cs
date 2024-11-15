@@ -65,7 +65,6 @@ public class CharacterController : MonoBehaviour
         // Jump logic
         if (isGrounded && Input.GetButtonDown("Jump"))
         {
-            isJumping = true;
             jumpDelayTimer = 0f;
             animator.SetTrigger("jump");
         }
@@ -75,15 +74,16 @@ public class CharacterController : MonoBehaviour
             jumpDelayTimer += Time.deltaTime;
             if(jumpDelayTimer > JUMP_DELAY)
             {
+                isJumping = true;
                 verticalVelocity = jumpForce;
             }
         }
 
-        // Apply gravity when not grounded
-        if (!isGrounded)
-        {
-            verticalVelocity += mass * gravity * Time.deltaTime;
-        }
+        //// Apply gravity when not grounded
+        //if (!isGrounded)
+        //{
+        //    verticalVelocity += mass * gravity * Time.deltaTime;
+        //}
 
         // Apply the movement and jumping logic
         moveDirection = transform.right * moveInputX;
@@ -92,10 +92,16 @@ public class CharacterController : MonoBehaviour
     void FixedUpdate()
     {
         // Apply horizontal movement and vertical velocity (for jump and gravity)
-        velocity = new Vector3(moveDirection.x * moveSpeed, verticalVelocity, moveDirection.z * moveSpeed);
+        velocity = new Vector3(moveDirection.x * moveSpeed, 0, moveDirection.z * moveSpeed);
 
         // Since it's kinematic, move the object manually using its position
         transform.position += velocity * Time.fixedDeltaTime;
+
+        if(isGrounded && isJumping)
+        {
+            GetComponent<Rigidbody>().AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isJumping = false;
+        }
     }
 
     public void CastSuperPower()
